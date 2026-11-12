@@ -11,7 +11,7 @@ Todo se ejecuta desde la raíz del repo con el Python del entorno:
 .venv\Scripts\python engine\run.py <paso> projects/<video> [...]
 ```
 
-Si `.venv` no existe o `run.py doctor` falla, ejecuta `powershell -ExecutionPolicy Bypass -File setup.ps1` primero.
+Si `.venv` no existe o `run.py doctor` falla, sigue primero la skill `instalar` (`.claude/skills/instalar/SKILL.md`).
 El ejemplo completo y real está en `examples/ramon-video1/` (project.json + broll_scenes.py): léelo antes de empezar un video nuevo.
 
 ## Flujo

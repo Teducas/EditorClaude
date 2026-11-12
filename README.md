@@ -15,14 +15,30 @@ Todo queda en pistas separadas de CapCut para que lo retoques y exportes desde a
 
 - Windows 10/11 con **CapCut Desktop** instalado (probado con CapCut 9.7).
 - **Claude Code**, ya sea la app de escritorio o la CLI.
-- Python 3.10+ y ffmpeg. El instalador los pone con `winget` si faltan.
 - Unos 3 GB libres: el modelo de transcripción, más los medios de cada proyecto.
+- Python 3.10+ y ffmpeg no hace falta instalarlos: el instalador los pone con `winget` si faltan.
 
 ## Instalación (una vez)
 
-```bash
-git clone <URL-de-este-repo> claude-capcut-editor
-```
+1. Clona el repositorio:
+
+   ```bash
+   git clone <URL-de-este-repo> claude-capcut-editor
+   ```
+
+2. Abre Claude Code en la carpeta `claude-capcut-editor`.
+3. Escribe:
+
+   > **INSTALAR**
+
+Claude hace el resto. Revisa el sistema y ejecuta `setup.ps1`, que:
+- Instala Python y ffmpeg si faltan.
+- Crea el entorno `.venv` e instala las dependencias.
+- Descarga el modelo de transcripción, de 1,5 GB. Solo pasa la primera vez.
+
+Al final, el diagnóstico `doctor` dice si todo está listo. Claude también te ofrece crear tu marca. Si algo falla, te dice qué hacer. Volver a escribir INSTALAR sigue donde se quedó.
+
+<details><summary>Instalar a mano, sin Claude</summary>
 
 ```bash
 cd claude-capcut-editor
@@ -32,11 +48,7 @@ cd claude-capcut-editor
 powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
 
-El instalador:
-1. Crea el entorno `.venv`.
-2. Instala las dependencias.
-3. Descarga el modelo de transcripción.
-4. Termina con un diagnóstico (`doctor`) que dice si todo está listo.
+</details>
 
 ## Uso
 
