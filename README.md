@@ -23,7 +23,7 @@ Todo queda en pistas separadas de CapCut para que lo retoques y exportes desde a
 1. Clona el repositorio:
 
    ```bash
-   git clone <URL-de-este-repo> claude-capcut-editor
+   git clone https://github.com/juanmarin-ctrl/claude-capcut-editor.git
    ```
 
 2. Abre Claude Code en la carpeta `claude-capcut-editor`.
