@@ -1,0 +1,19 @@
+# entorno
+.venv/
+__pycache__/
+*.pyc
+
+# tus videos: brutos, proyectos y resultados nunca se suben
+projects/*
+!projects/README.md
+
+# marcas: solo la demo va al repo (los logos de clientes son privados)
+brands/*
+!brands/demo/
+!brands/README.md
+
+# medios sueltos
+*.mov
+*.MOV
+*.mp4
+*.wav
