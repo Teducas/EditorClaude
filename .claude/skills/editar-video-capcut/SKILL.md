@@ -18,7 +18,9 @@ El ejemplo completo y real está en `examples/ramon-video1/` (project.json + bro
 
 1. **Crear el proyecto**
    `run.py init projects/<video> --source "<carpeta de brutos>" --brand <marca> --name "<nombre en CapCut>"`
-   Marca: carpeta en `brands/` con `brand.json` (colores, fuentes) y logo claro. Si el usuario no tiene, usa `demo` y ofrece crear la suya.
+   **Marca:** es la carpeta `marcas/<cliente>/`.
+   - **Sin `brand.json`, o con branding nuevo pegado:** primero sigue la skill `marca` (`.claude/skills/marca/SKILL.md`).
+   - **No hay branding:** pídele que copie el del cliente en `marcas/<cliente>/`, tal como le llegó. Mientras tanto usa `demo`.
    Mira los brutos antes de decidir nada: `ffprobe` (duración, resolución, rotación) y una hoja de miniaturas con ffmpeg.
 
 2. **Transcribir** — `run.py transcribe projects/<video>` → lee `work/transcript.txt`

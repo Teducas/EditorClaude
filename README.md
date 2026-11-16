@@ -20,14 +20,10 @@ Todo queda en pistas separadas de CapCut para que lo retoques y exportes desde a
 
 ## Instalación (una vez)
 
-1. Clona el repositorio:
-
-   ```bash
-   git clone https://github.com/juanmarin-ctrl/claude-capcut-editor.git
-   ```
-
-2. Abre Claude Code en la carpeta `claude-capcut-editor`.
-3. Escribe:
+1. **Descarga el editor:** en esta página, pulsa el botón verde **Code** y luego **Download ZIP**. No necesitas cuenta de GitHub.
+2. **Descomprímelo:** en Descargas, haz clic derecho en el ZIP, elige **Extraer todo** y mueve la carpeta donde quieras (por ejemplo, a Documentos).
+3. **Abre Claude Code en esa carpeta:** la que tiene dentro el archivo `README.md` y la carpeta `engine`. Si al extraer ves una carpeta dentro de otra con el mismo nombre, entra en la de dentro.
+4. Escribe:
 
    > **INSTALAR**
 
@@ -36,9 +32,13 @@ Claude hace el resto. Revisa el sistema y ejecuta `setup.ps1`, que:
 - Crea el entorno `.venv` e instala las dependencias.
 - Descarga el modelo de transcripción, de 1,5 GB. Solo pasa la primera vez.
 
-Al final, el diagnóstico `doctor` dice si todo está listo. Claude también te ofrece crear tu marca. Si algo falla, te dice qué hacer. Volver a escribir INSTALAR sigue donde se quedó.
+Al final, el diagnóstico `doctor` dice si todo está listo. Si algo falla, te dice qué hacer. Volver a escribir INSTALAR sigue donde se quedó.
 
-<details><summary>Instalar a mano, sin Claude</summary>
+<details><summary>Si sabes usar git, o quieres instalar a mano sin Claude</summary>
+
+```bash
+git clone https://github.com/juanmarin-ctrl/claude-capcut-editor.git
+```
 
 ```bash
 cd claude-capcut-editor
@@ -55,19 +55,23 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
 1. Abre Claude Code **en la carpeta del repo**: así carga la skill `editar-video-capcut` y el `CLAUDE.md`.
 2. Pídele, por ejemplo:
 
-   > Edita el video de `D:\Brutos\Clase 3`: quita muletillas y silencios, agrega tomas de apoyo y motion graphics, y déjalo listo en CapCut. Usa mi marca `mi-marca`.
+   > Edita el video de `D:\Brutos\Clase 3` con la marca de Café Andino.
 
 3. Claude sigue el flujo de la skill y te va mostrando hojas de control: transcripción, revisión del corte, animaciones y tarjetas.
 4. Cuando te lo pida, **cierra CapCut**.
 5. Al terminar, abre CapCut: el proyecto aparece en tu lista con el nombre elegido.
 
-### Tu marca
+### La marca del cliente
 
-Copia `brands/demo` a `brands/mi-marca` y cambia:
-- `brand.json`: colores por rol (`primary`, `deep`, `accent`, `accent2`, `light`, `muted`, `panel`) y fuentes.
-- `logo_light.png`: logo en blanco o claro, con fondo transparente.
+**Copia el branding del cliente en la carpeta `marcas`, en una subcarpeta con su nombre, sin importar el formato:** manual en PDF, logos en AI, SVG, PNG o JPG, presentaciones, un ZIP o fuentes.
+No hace falta convertir, renombrar ni ordenar nada.
 
-Las carpetas de marca, salvo `demo`, no se suben a git.
+Después dile a Claude *«Ya pegué el branding de Café Andino»*, o pídele directamente el video con esa marca. Claude:
+- saca los colores, el logo en blanco (le quita el fondo) y las tipografías;
+- te enseña una muestra de cómo se verán las tarjetas, los rótulos y los subtítulos;
+- lo cambia si le pides algo como «el naranja más oscuro» o «usa el otro logo».
+
+Las marcas de tus clientes se quedan en tu equipo: no se suben a git.
 
 ## Cómo funciona
 
@@ -80,9 +84,9 @@ brutos ─► transcribe ─► (Claude decide el montaje en project.json) ─�
 |---|---|
 | `engine/` | Motor: transcripción (faster-whisper), cortes por energía y palabras, motor de animación (PIL → ffmpeg), tarjetas, audio, constructor del borrador de CapCut, validador |
 | `template/capcut_template.json` | Plantilla anónima extraída de un borrador real de CapCut 9.7. CapCut no documenta su formato, así que se clonan objetos de un borrador que él mismo guardó |
-| `.claude/skills/editar-video-capcut/` | El flujo de trabajo y las reglas editoriales para Claude |
+| `.claude/skills/` | Las instrucciones para Claude: `instalar`, `marca` (branding en cualquier formato) y `editar-video-capcut` (flujo y reglas editoriales) |
 | `examples/ramon-video1/` | Un montaje real completo (`project.json` y `broll_scenes.py`) como referencia |
-| `brands/` | Identidades visuales |
+| `marcas/` | El branding de cada cliente, tal como llegó; Claude genera aquí `brand.json` y el logo en blanco |
 | `projects/` | Tus videos, uno por carpeta (ignorado por git) |
 
 ### Comandos (por si quieres ejecutarlos a mano)

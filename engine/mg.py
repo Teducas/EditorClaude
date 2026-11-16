@@ -1,6 +1,6 @@
 # Mini motor de motion graphics (PIL + numpy -> ffmpeg) con la identidad de la marca del proyecto.
 # Todo se dibuja a 3x y se reduce (bordes suaves). Cada escena es una función f(t) -> Image RGB.
-# Llamar a setup(P) ANTES de importar un archivo de escenas (los colores salen de brands/<marca>/brand.json).
+# Llamar a setup(P) ANTES de importar un archivo de escenas (los colores salen de marcas/<cliente>/brand.json).
 import math, os, subprocess, random, json
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter

@@ -1,6 +1,8 @@
 """Punto de entrada único del flujo. Ejecutar SIEMPRE con el Python del entorno (.venv):
 
   .venv\\Scripts\\python engine\\run.py doctor
+  .venv\\Scripts\\python engine\\run.py marca         marcas/cliente      (analiza el branding en cualquier formato)
+  .venv\\Scripts\\python engine\\run.py marca-aplicar marcas/cliente --logo <archivo> --colores primary=#hex,accent=#hex
   .venv\\Scripts\\python engine\\run.py init       projects/mi-video --source "D:/Brutos/Mi video" --brand demo --name "Mi video"
   .venv\\Scripts\\python engine\\run.py transcribe projects/mi-video
   (editar projects/mi-video/project.json -> "order", "fix", "keywords")
@@ -29,7 +31,7 @@ def doctor():
         nonlocal ok; ok &= bool(good); print(("OK   " if good else "FALTA"), msg)
     line(sys.version_info >= (3, 10), f"Python {sys.version.split()[0]} (>= 3.10)")
     line(shutil.which("ffmpeg") and shutil.which("ffprobe"), "ffmpeg y ffprobe en el PATH")
-    for mod in ("numpy", "scipy", "PIL", "faster_whisper"):
+    for mod in ("numpy", "scipy", "PIL", "faster_whisper", "fitz"):
         try: __import__(mod); line(True, f"módulo {mod}")
         except ImportError: line(False, f"módulo {mod} (ejecuta setup.ps1)")
     drafts = os.path.expandvars(r"%LOCALAPPDATA%\CapCut\User Data\Projects\com.lveditor.draft")
@@ -63,8 +65,9 @@ def init(args):
     json.dump(cfg, open(cfg_path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     for d in ("work", "media", "broll", "overlays", "audio"):
         os.makedirs(os.path.join(a.project, d), exist_ok=True)
-    if not os.path.isdir(os.path.join(REPO, "brands", a.brand)):
-        print(f"Aviso: no existe brands/{a.brand}; copia brands/demo y personalízala.")
+    from common import brand_dir
+    if not os.path.exists(os.path.join(brand_dir(a.brand), "brand.json")):
+        print(f"Aviso: la marca {a.brand} no está lista. Pega el branding en marcas/{a.brand}/ y ejecuta run.py marca marcas/{a.brand}.")
     print("Proyecto creado:", cfg_path)
 
 def where(args):
@@ -81,6 +84,10 @@ def main():
     if cmd == "doctor": sys.exit(0 if doctor() else 1)
     if cmd == "init": return init(args)
     if cmd == "where": return where(args)
+    if cmd in ("marca", "marca-aplicar"):
+        import brand_kit
+        if not args: sys.exit("Falta la carpeta de la marca. Ej: run.py marca marcas/cliente")
+        return brand_kit.analizar(args[0]) if cmd == "marca" else brand_kit.aplicar(args[0], args[1:])
     if cmd in ("broll-preview", "broll-render"):
         import broll
         return broll.main(cmd.split("-")[1], args[0], args[1:])

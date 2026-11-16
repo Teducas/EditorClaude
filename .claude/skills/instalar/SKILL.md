@@ -38,14 +38,11 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
   - **Codificador de vídeo:** no es grave, se usa el de CPU.
 
 ## 4. Marca (opcional, pregúntalo)
-Pregunta si quiere crear ya su marca. Si dice que sí:
-1. Pídele el nombre, los colores (o el manual de marca) y el logo en blanco con fondo transparente.
-2. Copia `brands/demo` a `brands/<nombre-en-minusculas-con-guiones>`.
-3. Rellena `brand.json` con los colores por rol: `primary`, `deep`, `accent`, `accent2`, `light`, `muted` y `panel`.
-4. Pon el logo como `logo_light.png`.
+Dile: «Si quieres, copia el branding de tu cliente, tal como te llegó y en cualquier formato, en la carpeta `marcas`, dentro de una carpeta con su nombre. Avísame y lo preparo».
+Cuando avise, sigue `.claude/skills/marca/SKILL.md`.
 
 ## 5. Cierre
 Responde con un resumen corto:
 - Qué quedó instalado, con las líneas OK del `doctor`.
 - Qué falta, si falta algo.
-- La frase para empezar: «Edita el video de `D:\ruta\a\tus\brutos` con mi marca `<marca>`».
+- La frase para empezar: «Edita el video de `D:\ruta\a\tus\brutos` con la marca de <cliente>».

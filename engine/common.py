@@ -11,9 +11,15 @@ class Project:
         self.cfg = json.load(open(self.cfg_path, encoding="utf-8-sig"))  # tolera BOM (Bloc de notas)
         for d in ("work", "media", "broll", "overlays", "audio"):
             os.makedirs(self.p(d), exist_ok=True)
-        b = self.cfg.get("brand", "demo")
-        self.brand_dir = b if os.path.isabs(b) else os.path.join(REPO, "brands", b)
-        self.brand = json.load(open(os.path.join(self.brand_dir, "brand.json"), encoding="utf-8-sig"))
+        self.brand_dir = brand_dir(self.cfg.get("brand", "demo"))
+        bj = os.path.join(self.brand_dir, "brand.json")
+        if not os.path.exists(bj):
+            sys.exit(f"La marca {self.brand_dir} aún no está preparada: ejecuta  run.py marca {os.path.relpath(self.brand_dir, REPO)}  y luego marca-aplicar")
+        self.brand = json.load(open(bj, encoding="utf-8-sig"))
+        # fuentes de la marca: rutas relativas a su carpeta
+        fonts = self.brand.get("fonts", {})
+        for k, v in list(fonts.items()):
+            if v and not os.path.isabs(v): fonts[k] = os.path.join(self.brand_dir, v).replace("\\", "/")
 
     def p(self, *parts): return os.path.join(self.dir, *parts)
     @property
@@ -29,6 +35,14 @@ class Project:
         for f in os.listdir(self.source_dir):
             if os.path.splitext(f)[0] == clip: return os.path.join(self.source_dir, f)
         raise FileNotFoundError(clip)
+
+def brand_dir(b):
+    """Carpeta de una marca: ruta absoluta, marcas/<b> o (compatibilidad) brands/<b>."""
+    if os.path.isabs(b): return b
+    for base in ("marcas", "brands"):
+        p = os.path.join(REPO, base, b)
+        if os.path.isdir(p): return p
+    return os.path.join(REPO, "marcas", b)
 
 def project_from_argv():
     if len(sys.argv) < 2:
