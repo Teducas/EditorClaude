@@ -1,6 +1,5 @@
 ﻿{
  "name": "Marca demo",
  "colors": {"primary": "#1b2a4a", "deep": "#0e1730", "accent": "#ff7a45", "accent2": "#ffb38a", "light": "#b8c7e0", "muted": "#5f7aa8", "panel": "#111d38"},
- "fonts": {"black": "C:/Windows/Fonts/seguibl.ttf", "bold": "C:/Windows/Fonts/segoeuib.ttf", "semi": "C:/Windows/Fonts/seguisb.ttf", "reg": "C:/Windows/Fonts/segoeui.ttf"},
  "logo_light": "logo_light.png"
 }

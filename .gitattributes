@@ -1,0 +1,2 @@
+# setup.sh debe tener finales de línea Unix o bash falla en Mac
+*.sh text eol=lf

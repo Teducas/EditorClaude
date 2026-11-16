@@ -1,8 +1,9 @@
 """Rutas y configuración compartidas. Cada video es una carpeta de proyecto con project.json."""
 import json, os, re, sys, subprocess, shutil
 
+from platforms import venv_python
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VENV_PY = os.path.join(REPO, ".venv", "Scripts" if os.name == "nt" else "bin", "python.exe" if os.name == "nt" else "python")
+VENV_PY = venv_python(REPO)
 
 class Project:
     def __init__(self, path):
@@ -16,10 +17,14 @@ class Project:
         if not os.path.exists(bj):
             sys.exit(f"La marca {self.brand_dir} aún no está preparada: ejecuta  run.py marca {os.path.relpath(self.brand_dir, REPO)}  y luego marca-aplicar")
         self.brand = json.load(open(bj, encoding="utf-8-sig"))
-        # fuentes de la marca: rutas relativas a su carpeta
-        fonts = self.brand.get("fonts", {})
-        for k, v in list(fonts.items()):
-            if v and not os.path.isabs(v): fonts[k] = os.path.join(self.brand_dir, v).replace("\\", "/")
+        # fuentes: las de la marca (rutas relativas a su carpeta) si existen en este equipo; si no, las del sistema
+        from platforms import default_fonts
+        fonts = default_fonts()
+        for k, v in (self.brand.get("fonts") or {}).items():
+            if not v: continue
+            p = v if os.path.isabs(v) else os.path.join(self.brand_dir, v)
+            if os.path.exists(p): fonts[k] = p.replace("\\", "/")
+        self.brand["fonts"] = {k: v for k, v in fonts.items() if v}
 
     def p(self, *parts): return os.path.join(self.dir, *parts)
     @property

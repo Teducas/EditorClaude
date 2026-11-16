@@ -38,5 +38,6 @@ def validate(path):
 
 if __name__ == "__main__":
     P = project_from_argv()
-    drafts = P.cfg.get("capcut_drafts_dir") or os.path.expandvars(r"%LOCALAPPDATA%\CapCut\User Data\Projects\com.lveditor.draft")
+    from platforms import capcut_drafts_dir
+    drafts = P.cfg.get("capcut_drafts_dir") or capcut_drafts_dir()
     sys.exit(0 if validate(os.path.join(drafts, P.cfg["name"], "draft_content.json")) else 1)

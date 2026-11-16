@@ -155,7 +155,7 @@ class Scan:
         if svg_to_png(path, out):
             self.add_image(self.rel(path), Image.open(out).copy(), "vectorial (convertido a PNG)")
         else:
-            self.skipped.append((self.rel(path), "no se pudo convertir el SVG (falta Microsoft Edge); los colores sí se leyeron"))
+            self.skipped.append((self.rel(path), "no se pudo convertir el SVG a imagen; los colores sí se leyeron"))
 
     def office(self, path):
         base = os.path.splitext(os.path.basename(path))[0]
@@ -228,13 +228,21 @@ class Scan:
             dirs[:] = sorted(d for d in dirs if os.path.join(root, d) != self.rev and not d.startswith("."))
             for f in sorted(files): self.file(os.path.join(root, f))
 
-def find_edge():
-    for p in (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"):
-        if os.path.exists(p): return p
-    return shutil.which("msedge")
-
 def svg_to_png(svg, out, size=1200):
-    edge = find_edge()
+    """SVG -> PNG transparente recortado. Primero PyMuPDF (Windows y Mac); si falla, Chrome/Edge sin ventana."""
+    try:
+        import fitz
+        d = fitz.open(svg); pg = d[0]
+        z = size / max(pg.rect.width, pg.rect.height, 1)
+        pm = pg.get_pixmap(matrix=fitz.Matrix(z, z), alpha=True)
+        im = Image.frombytes("RGBA", (pm.width, pm.height), pm.samples)
+        bb = im.getbbox()
+        if bb:
+            im.crop(bb).save(out); return True
+    except Exception:
+        pass
+    from platforms import browser
+    edge = browser()
     if not edge: return False
     import pathlib, tempfile
     src = open(svg, encoding="utf-8", errors="ignore").read()
@@ -270,8 +278,9 @@ def checker(w, h, s=16):
     return im
 
 def ui_font(size, bold=False):
-    for f in (("C:/Windows/Fonts/segoeuib.ttf" if bold else "C:/Windows/Fonts/segoeui.ttf"), "C:/Windows/Fonts/arial.ttf"):
-        if os.path.exists(f): return ImageFont.truetype(f, size)
+    from platforms import default_fonts
+    f = default_fonts().get("bold" if bold else "reg")
+    if f and os.path.exists(f): return ImageFont.truetype(f, size)
     return ImageFont.load_default()
 
 def contact_sheets(scan):
@@ -327,7 +336,8 @@ def analizar(folder):
     L += ["", "TODAS LAS IMÁGENES (número de la hoja)"]
     L += [f"  {i + 1}. {lbl}  [{img.width}×{img.height}] {note}" for i, (lbl, img, pal, note) in enumerate(s.items)]
     L += ["", "FUENTES"]
-    L += [f"  {p}  →  {fam} {sty}" for p, fam, sty in s.fonts] or ["  (ninguna: se usará Segoe UI)"]
+    from platforms import DEFAULT_FONT_LABEL
+    L += [f"  {p}  →  {fam} {sty}" for p, fam, sty in s.fonts] or [f"  (ninguna: se usará {DEFAULT_FONT_LABEL})"]
     if s.texts: L += ["", "TEXTO EXTRAÍDO (léelo si es un manual de marca)"] + [f"  {t}" for t in s.texts]
     if s.skipped: L += ["", "NO SE PUDIERON LEER"] + [f"  {f}: {why}" for f, why in s.skipped]
     L += ["", "HOJAS DE REVISIÓN"] + [f"  {os.path.relpath(p, folder)}" for p in sheets]
@@ -420,7 +430,9 @@ def sample(folder, brand, logo_white):
     """Muestra de cómo se verá la marca en el video (tarjeta, rótulo, subtítulo, logo y paleta)."""
     c = {k: from_hex(v) for k, v in brand["colors"].items()}
     fonts = {k: (v if os.path.isabs(v) else os.path.join(folder, v)) for k, v in brand.get("fonts", {}).items()}
-    F = lambda k, s: ImageFont.truetype(fonts.get(k, {"black": "C:/Windows/Fonts/seguibl.ttf", "bold": "C:/Windows/Fonts/segoeuib.ttf", "semi": "C:/Windows/Fonts/seguisb.ttf", "reg": "C:/Windows/Fonts/segoeui.ttf"}[k]), s)
+    from platforms import default_fonts
+    DEF = default_fonts()
+    F = lambda k, s: ImageFont.truetype(fonts[k] if k in fonts and os.path.exists(fonts[k]) else DEF[k], s)
     W, H = 1600, 900
     im = Image.new("RGB", (W, H)); d = ImageDraw.Draw(im)
     for y in range(H): d.line([(0, y), (W, y)], fill=tuple(int(v) for v in mix(c["primary"], c["deep"], y / H)))
@@ -483,7 +495,8 @@ def aplicar(folder, argv):
     print("Marca lista:", os.path.join(folder, "brand.json"))
     print("  colores:", ", ".join(f"{k}={v}" for k, v in colors.items()))
     print("  logo:", brand["source_logo"], "(fondo quitado)" if cut else "(ya era transparente)" if not a.logo_tal_cual else "(tal cual)")
-    print("  fuentes:", ", ".join(f"{k}={v}" for k, v in fonts.items()) if fonts else "Segoe UI (no había fuentes de la marca)")
+    from platforms import DEFAULT_FONT_LABEL
+    print("  fuentes:", ", ".join(f"{k}={v}" for k, v in fonts.items()) if fonts else f"{DEFAULT_FONT_LABEL} (no había fuentes de la marca)")
     print("  MUESTRA para aprobar:", out)
 
 if __name__ == "__main__":

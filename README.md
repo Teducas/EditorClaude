@@ -13,21 +13,25 @@ Todo queda en pistas separadas de CapCut para que lo retoques y exportes desde a
 
 ## Requisitos
 
-- Windows 10/11 con **CapCut Desktop** instalado (probado con CapCut 9.7).
+- **Windows 10/11 o Mac**, con **CapCut Desktop** instalado (probado con CapCut 9.7 en Windows).
 - **Claude Code**, ya sea la app de escritorio o la CLI.
 - Unos 3 GB libres: el modelo de transcripción, más los medios de cada proyecto.
-- Python 3.10+ y ffmpeg no hace falta instalarlos: el instalador los pone con `winget` si faltan.
+- Python 3.10+ y ffmpeg no hace falta instalarlos: el instalador los pone si faltan. En Windows usa `winget`; en Mac, Homebrew. Si el Mac no tiene Homebrew, Claude te pide pegar una línea en Terminal: Homebrew pide la contraseña del Mac.
 
 ## Instalación (una vez)
 
 1. **Descarga el editor:** en esta página, pulsa el botón verde **Code** y luego **Download ZIP**. No necesitas cuenta de GitHub.
-2. **Descomprímelo:** en Descargas, haz clic derecho en el ZIP, elige **Extraer todo** y mueve la carpeta donde quieras (por ejemplo, a Documentos).
+2. **Descomprímelo:**
+   - **Windows:** en Descargas, haz clic derecho en el ZIP y elige **Extraer todo**.
+   - **Mac:** haz doble clic en el ZIP; el Mac lo descomprime solo.
+
+   Después mueve la carpeta donde quieras (por ejemplo, a Documentos).
 3. **Abre Claude Code en esa carpeta:** la que tiene dentro el archivo `README.md` y la carpeta `engine`. Si al extraer ves una carpeta dentro de otra con el mismo nombre, entra en la de dentro.
 4. Escribe:
 
    > **INSTALAR**
 
-Claude hace el resto. Revisa el sistema y ejecuta `setup.ps1`, que:
+Claude hace el resto. Revisa el sistema y ejecuta el instalador (`setup.ps1` en Windows, `setup.sh` en Mac), que:
 - Instala Python y ffmpeg si faltan.
 - Crea el entorno `.venv` e instala las dependencias.
 - Descarga el modelo de transcripción, de 1,5 GB. Solo pasa la primera vez.
@@ -44,8 +48,16 @@ git clone https://github.com/juanmarin-ctrl/claude-capcut-editor.git
 cd claude-capcut-editor
 ```
 
+En Windows:
+
 ```bash
 powershell -ExecutionPolicy Bypass -File setup.ps1
+```
+
+En Mac:
+
+```bash
+bash setup.sh
 ```
 
 </details>
@@ -56,6 +68,8 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
 2. Pídele, por ejemplo:
 
    > Edita el video de `D:\Brutos\Clase 3` con la marca de Café Andino.
+
+   En Mac, arrastra la carpeta de brutos a la ventana de Claude Code para pegar su ruta.
 
 3. Claude sigue el flujo de la skill y te va mostrando hojas de control: transcripción, revisión del corte, animaciones y tarjetas.
 4. Cuando te lo pida, **cierra CapCut**.
@@ -91,8 +105,16 @@ brutos ─► transcribe ─► (Claude decide el montaje en project.json) ─�
 
 ### Comandos (por si quieres ejecutarlos a mano)
 
+En Windows:
+
 ```bash
 .venv\Scripts\python engine\run.py help
+```
+
+En Mac:
+
+```bash
+.venv/bin/python engine/run.py help
 ```
 
 ## Si CapCut no abre el proyecto
@@ -101,14 +123,30 @@ Las versiones de CapCut cambian su formato interno. Haz esto:
 1. En tu CapCut, crea un proyecto con un video, una imagen, un texto, un audio y un fotograma clave.
 2. Ciérralo y ejecuta:
 
+En Windows:
+
 ```bash
 .venv\Scripts\python engine\make_template.py "%LOCALAPPDATA%\CapCut\User Data\Projects\com.lveditor.draft\<nombre de ese proyecto>"
 ```
+
+En Mac:
+
+```bash
+.venv/bin/python engine/make_template.py ~/Movies/CapCut/"User Data"/Projects/com.lveditor.draft/"<nombre de ese proyecto>"
+```
+
+O, más fácil: pídele a Claude *«CapCut no abre el proyecto, regenera la plantilla con mi proyecto de prueba»*.
 
 3. Vuelve a ejecutar `build`. La plantilla nueva sale de tu propia versión de CapCut y se anonimiza automáticamente.
 
 ## Limitaciones
 
 - Pensado para tomas a cámara fija de una persona. El reencuadre asume la cara en una posición parecida en todas las tomas (`framing` en `project.json`).
-- Solo Windows: las rutas de CapCut y las fuentes Segoe UI son de Windows.
+- **Mac: compatible, pero aún sin comprobar en un Mac real.**
+  - La plantilla incluida sale de CapCut 9.7 en Windows.
+  - En Mac el editor escribe también los archivos que usa CapCut para Mac (`draft_info.json`).
+  - Si tu CapCut para Mac no abre el primer proyecto, regenera la plantilla con un proyecto de prueba, como se explica arriba. A partir de ahí queda hecha con tu propio CapCut.
+  - Si tu versión de CapCut guarda los borradores cifrados, el editor no puede leer ese proyecto de prueba: te lo dirá.
+- **Fuentes por defecto:** Segoe UI en Windows y Arial en Mac. Con las fuentes de la marca se ve igual en los dos.
+- **Carpeta de CapCut:** si la cambiaste en Ajustes › Borrador, indica la nueva con `"capcut_drafts_dir"` en el `project.json` o con la variable `CAPCUT_DRAFTS_DIR`.
 - La música y los efectos son sintetizados: discretos, no de biblioteca. Puedes cambiarlos por pistas de CapCut Pro.

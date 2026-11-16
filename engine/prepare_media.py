@@ -2,14 +2,15 @@
 - hornea la rotación de los metadatos (los iPhone graban girados) para que CapCut no las muestre al revés,
 - mantiene la resolución original (4K permite acercar sin perder nitidez),
 - limpia la voz (paso alto 80 Hz, reducción de ruido suave, compresor, limitador) y la nivela a voice_lufs.
-Usa el codificador por hardware disponible (Intel QSV, NVIDIA NVENC, AMD AMF) o libx264.
+Usa el codificador por hardware disponible (Mac VideoToolbox, Intel QSV, NVIDIA NVENC, AMD AMF) o libx264.
 """
 import json, os, re, subprocess
 from common import project_from_argv
 
 def pick_encoder():
     enc = subprocess.run(["ffmpeg", "-hide_banner", "-encoders"], capture_output=True, text=True).stdout
-    for name, args in (("h264_nvenc", ["-cq", "19", "-preset", "p5"]), ("h264_qsv", ["-global_quality", "20", "-preset", "faster"]),
+    for name, args in (("h264_videotoolbox", ["-q:v", "70", "-allow_sw", "1"]),  # Mac (Apple Silicon e Intel)
+                       ("h264_nvenc", ["-cq", "19", "-preset", "p5"]), ("h264_qsv", ["-global_quality", "20", "-preset", "faster"]),
                        ("h264_amf", ["-quality", "quality", "-rc", "cqp", "-qp_i", "19", "-qp_p", "21"])):
         if name in enc:
             test = subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", "color=s=256x256:d=0.2", "-c:v", name, *args, "-f", "null", "-"], capture_output=True)

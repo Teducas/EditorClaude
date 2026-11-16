@@ -22,17 +22,44 @@ def scrub(o, keep_font=True):
         out = {}
         for k, v in o.items():
             if k in SENSITIVE_KEYS and isinstance(v, str):
-                out[k] = v if (keep_font and k == "path" and v.lower().startswith("c:/windows/fonts")) else ""
+                out[k] = v if (keep_font and k == "path" and is_system_font(v)) else ""
             else:
                 out[k] = scrub(v, keep_font)
         return out
     if isinstance(o, list): return [scrub(x, keep_font) for x in o]
-    if isinstance(o, str) and re.search(r"[A-Za-z]:[\\/]|\\Users\\|/Users/", o) and not o.lower().startswith("c:/windows/fonts"):
+    if isinstance(o, str) and re.search(r"[A-Za-z]:[\\/]|\\Users\\|/Users/", o) and not is_system_font(o):
         return ""
     return o
 
+def is_system_font(p):
+    p = p.lower()
+    return p.startswith(("c:/windows/fonts", "/system/library/fonts", "/library/fonts"))
+
+def load_draft(src):
+    """El archivo principal cambia según sistema y versión: draft_content.json (Windows), draft_info.json (Mac),
+    o dentro de Timelines/<id>/. Devuelve el primero que sea JSON legible."""
+    cands = []
+    pj = os.path.join(src, "Timelines", "project.json")
+    if os.path.exists(pj):
+        try:
+            tid = json.load(open(pj, encoding="utf-8")).get("main_timeline_id")
+            if tid: cands += [os.path.join(src, "Timelines", tid, n) for n in ("draft_content.json", "draft_info.json", "template-2.tmp")]
+        except ValueError:
+            pass
+    cands += [os.path.join(src, n) for n in ("draft_content.json", "draft_info.json", "template-2.tmp")]
+    seen_encrypted = False
+    for c in cands:
+        if not os.path.exists(c): continue
+        try:
+            d = json.load(open(c, encoding="utf-8"))
+            if isinstance(d, dict) and "tracks" in d and "materials" in d: return d
+        except (ValueError, UnicodeDecodeError):
+            seen_encrypted = True
+    sys.exit("No encuentro un borrador legible en esa carpeta." + (
+        " Los archivos parecen cifrados: esta versión de CapCut guarda los borradores cifrados y el editor no puede leerlos." if seen_encrypted else ""))
+
 def main(src):
-    d = json.load(open(os.path.join(src, "draft_content.json"), encoding="utf-8"))
+    d = load_draft(src)
     meta = json.load(open(os.path.join(src, "draft_meta_info.json"), encoding="utf-8"))
     idx = {o["id"]: (k, o) for k, v in d["materials"].items() if isinstance(v, list) for o in v if isinstance(o, dict) and "id" in o}
     vsegs = [s for t in d["tracks"] if t["type"] == "video" for s in t["segments"]]

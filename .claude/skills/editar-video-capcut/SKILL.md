@@ -8,7 +8,11 @@ description: Edita videos de una persona hablando a cámara (clases, cursos, tal
 Todo se ejecuta desde la raíz del repo con el Python del entorno:
 
 ```
-.venv\Scripts\python engine\run.py <paso> projects/<video> [...]
+PY engine/run.py <paso> projects/<video> [...]
+```
+`PY` es `.venv\Scripts\python` en Windows y `.venv/bin/python` en Mac.
+
+```
 ```
 
 Si `.venv` no existe o `run.py doctor` falla, sigue primero la skill `instalar` (`.claude/skills/instalar/SKILL.md`).
@@ -61,7 +65,7 @@ El ejemplo completo y real está en `examples/ramon-video1/` (project.json + bro
 
 10. **Construir el borrador** — pide al usuario que CIERRE CapCut, luego `run.py build` y `run.py validate`.
     El proyecto aparece en CapCut con el nombre de `name`. Si CapCut no lo abre, regenera la plantilla desde un
-    borrador guardado por SU CapCut con `.venv\Scripts\python engine\make_template.py "<carpeta de un borrador>"`
+    borrador guardado por SU CapCut con `PY engine/make_template.py "<carpeta de un borrador>"`
     (un borrador con al menos un video, una imagen, un texto, un audio y un keyframe) y vuelve a construir.
 
 ## Reglas

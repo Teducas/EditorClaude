@@ -6,16 +6,17 @@ Cierra CapCut antes de ejecutarlo (CapCut reescribe la lista de proyectos al cer
 import json, os, sys, uuid, time, copy, shutil, subprocess, re
 from common import project_from_argv, REPO
 from timeline import Timeline
+from platforms import capcut_drafts_dir, native_path, IS_MAC, OS_NAME
 
 P = project_from_argv(); C = P.cfg; TL = Timeline(P)
 NAME = C["name"]
-DRAFTS = C.get("capcut_drafts_dir") or os.path.expandvars(r"%LOCALAPPDATA%\CapCut\User Data\Projects\com.lveditor.draft")
+DRAFTS = C.get("capcut_drafts_dir") or capcut_drafts_dir()
 DRAFTS = DRAFTS.replace("\\", "/"); OUT = f"{DRAFTS}/{NAME}"
 PD = P.dir.replace("\\", "/")
 MEDIA, BROLL, OVL, AUD = (f"{PD}/{d}" for d in ("media", "broll", "overlays", "audio"))
 US, W, H = 1_000_000, 1920, 1080
 FONTS = P.brand.get("fonts", {})
-FONT_CAP = FONTS.get("black", "C:/Windows/Fonts/seguibl.ttf")
+FONT_CAP = FONTS["black"]   # la de la marca o la del sistema (ver platforms.default_fonts)
 def rgb(h): return [round(int(h[i:i + 2], 16) / 255, 4) for i in (1, 3, 5)]
 COL = P.brand["colors"]
 WHITE, ACCENT, DEEP = [1, 1, 1], rgb(COL.get("accent", "#e4893f")), rgb(COL.get("deep", "#0a1d36"))
@@ -270,10 +271,18 @@ draft.update(id=DID, name=NAME, duration=us(END), fps=30.0, create_time=NOW, upd
              canvas_config=dict(draft.get("canvas_config", {}), ratio="16:9", width=W, height=H),
              materials=materials, tracks=tracks, relationships=[], group_container=None, time_marks=None)
 draft["keyframes"] = {k: [] for k in (draft.get("keyframes") or {"videos": [], "audios": [], "texts": [], "stickers": [], "effects": [], "filters": [], "adjusts": [], "handwrites": []})}
+if IS_MAC:  # el borrador dice en qué sistema se creó
+    import platform as _pf
+    for k in ("platform", "last_modified_platform"):
+        if isinstance(draft.get(k), dict): draft[k] = dict(draft[k], os=OS_NAME, os_version=_pf.mac_ver()[0] or draft[k].get("os_version", ""))
 if os.path.exists(OUT): shutil.rmtree(OUT)
 os.makedirs(f"{OUT}/Timelines/{DID}", exist_ok=True)
 js = json.dumps(draft, ensure_ascii=False)
-for p in (f"{OUT}/draft_content.json", f"{OUT}/Timelines/{DID}/draft_content.json"): open(p, "w", encoding="utf-8").write(js)
+# Windows (CapCut 9.7, probado): draft_content.json en la raíz y en Timelines/<id>/.
+# Mac: según la versión, CapCut lee draft_content.json, draft_info.json o template-2.tmp: se escriben los tres.
+names = ["draft_content.json"] + (["draft_info.json", "template-2.tmp"] if IS_MAC else [])
+for n in names:
+    for p in (f"{OUT}/{n}", f"{OUT}/Timelines/{DID}/{n}"): open(p, "w", encoding="utf-8").write(js)
 now_us = int(time.time() * US)
 json.dump({"config": {"color_space": -1, "hdr_vivid": False, "mixed_track_mode_on": False, "render_index_track_mode_on": False, "use_float_render": False},
            "create_time": now_us, "id": UUID(), "main_timeline_id": DID,
@@ -291,8 +300,8 @@ rp = f"{DRAFTS}/root_meta_info.json"
 root = json.load(open(rp, encoding="utf-8")) if os.path.exists(rp) else {"all_draft_store": [], "draft_ids": 0, "root_path": DRAFTS}
 if os.path.exists(rp) and not os.path.exists(rp + ".bak_claude"): shutil.copy(rp, rp + ".bak_claude")
 entry = clone(root["all_draft_store"][0] if root["all_draft_store"] else TPL["root_entry"] or {})
-entry.update(draft_cover=f"{OUT}/draft_cover.jpg".replace("/", "\\"), draft_fold_path=OUT, draft_id=MID,
-             draft_json_file=f"{OUT}/draft_content.json".replace("/", "\\"), draft_name=NAME, draft_root_path=DRAFTS,
+entry.update(draft_cover=native_path(f"{OUT}/draft_cover.jpg"), draft_fold_path=OUT, draft_id=MID,
+             draft_json_file=native_path(f"{OUT}/{'draft_info.json' if IS_MAC else 'draft_content.json'}"), draft_name=NAME, draft_root_path=DRAFTS,
              draft_timeline_materials_size=size, tm_draft_create=now_us, tm_draft_modified=now_us, tm_duration=us(END))
 root["all_draft_store"] = [entry] + [d for d in root["all_draft_store"] if d.get("draft_name") != NAME]
 root["draft_ids"] = len(root["all_draft_store"])

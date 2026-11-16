@@ -19,9 +19,8 @@ NAVY = PRIMARY = hx("#14355a"); DEEP = hx("#0a1d36"); STEEL = MUTED = hx("#608ba
 ORANGE = ACCENT = hx("#e4893f"); SAND = ACCENT2 = hx("#e0a96d"); ICE = LIGHT = hx("#a9c0d6"); WHITE = hx("#ffffff")
 GREY, GREEN, RED = hx("#7d8ea3"), hx("#3fbf7f"), hx("#e05252")
 
-FONTS = {"black": "C:/Windows/Fonts/seguibl.ttf", "bold": "C:/Windows/Fonts/segoeuib.ttf",
-         "semi": "C:/Windows/Fonts/seguisb.ttf", "reg": "C:/Windows/Fonts/segoeui.ttf",
-         "emoji": "C:/Windows/Fonts/seguiemj.ttf", "sym": "C:/Windows/Fonts/seguisym.ttf"}
+from platforms import default_fonts
+FONTS = default_fonts()   # Segoe UI en Windows, Arial en Mac; la marca puede traer las suyas
 
 BRAND = {}
 

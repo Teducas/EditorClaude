@@ -1,20 +1,20 @@
 """Punto de entrada único del flujo. Ejecutar SIEMPRE con el Python del entorno (.venv):
 
-  .venv\\Scripts\\python engine\\run.py doctor
-  .venv\\Scripts\\python engine\\run.py marca         marcas/cliente      (analiza el branding en cualquier formato)
-  .venv\\Scripts\\python engine\\run.py marca-aplicar marcas/cliente --logo <archivo> --colores primary=#hex,accent=#hex
-  .venv\\Scripts\\python engine\\run.py init       projects/mi-video --source "D:/Brutos/Mi video" --brand demo --name "Mi video"
-  .venv\\Scripts\\python engine\\run.py transcribe projects/mi-video
+  python engine/run.py doctor
+  python engine/run.py marca         marcas/cliente      (analiza el branding en cualquier formato)
+  python engine/run.py marca-aplicar marcas/cliente --logo <archivo> --colores primary=#hex,accent=#hex
+  python engine/run.py init       projects/mi-video --source "D:/Brutos/Mi video" --brand demo --name "Mi video"
+  python engine/run.py transcribe projects/mi-video
   (editar projects/mi-video/project.json -> "order", "fix", "keywords")
-  .venv\\Scripts\\python engine\\run.py cuts       projects/mi-video
-  .venv\\Scripts\\python engine\\run.py check      projects/mi-video
-  .venv\\Scripts\\python engine\\run.py media      projects/mi-video
-  .venv\\Scripts\\python engine\\run.py broll-preview / broll-render projects/mi-video [escena ...]
-  .venv\\Scripts\\python engine\\run.py overlays   projects/mi-video
-  .venv\\Scripts\\python engine\\run.py audio      projects/mi-video
-  .venv\\Scripts\\python engine\\run.py build      projects/mi-video   (cierra CapCut antes)
-  .venv\\Scripts\\python engine\\run.py validate   projects/mi-video
-  .venv\\Scripts\\python engine\\run.py where      projects/mi-video IMG_0137:6   (segundo del montaje de una palabra)
+  python engine/run.py cuts       projects/mi-video
+  python engine/run.py check      projects/mi-video
+  python engine/run.py media      projects/mi-video
+  python engine/run.py broll-preview / broll-render projects/mi-video [escena ...]
+  python engine/run.py overlays   projects/mi-video
+  python engine/run.py audio      projects/mi-video
+  python engine/run.py build      projects/mi-video   (cierra CapCut antes)
+  python engine/run.py validate   projects/mi-video
+  python engine/run.py where      projects/mi-video IMG_0137:6   (segundo del montaje de una palabra)
 """
 import json, os, sys, runpy, shutil, subprocess
 
@@ -34,12 +34,17 @@ def doctor():
     for mod in ("numpy", "scipy", "PIL", "faster_whisper", "fitz"):
         try: __import__(mod); line(True, f"módulo {mod}")
         except ImportError: line(False, f"módulo {mod} (ejecuta setup.ps1)")
-    drafts = os.path.expandvars(r"%LOCALAPPDATA%\CapCut\User Data\Projects\com.lveditor.draft")
+    from platforms import capcut_drafts_dir, OS_NAME, default_fonts
+    print(f"OK    sistema: {OS_NAME}")
+    drafts = capcut_drafts_dir()
     line(os.path.isdir(drafts), f"CapCut Desktop (carpeta de borradores: {drafts})")
+    fonts = default_fonts()
+    line(all(fonts.get(k) and os.path.exists(fonts[k]) for k in ("black", "bold", "semi", "reg")), "fuentes del sistema para textos y animaciones")
     tpl = os.path.join(REPO, "template", "capcut_template.json")
     if os.path.exists(tpl):
-        v = json.load(open(tpl, encoding="utf-8")).get("capcut_version")
-        print(f"OK    plantilla de CapCut (extraída de CapCut {v}; si tu CapCut no abre los proyectos, regenera con engine/make_template.py)")
+        t = json.load(open(tpl, encoding="utf-8"))
+        v, tos = t.get("capcut_version"), (t.get("skeleton", {}).get("platform") or {}).get("os", "?")
+        print(f"OK    plantilla de CapCut (extraída de CapCut {v} en {tos}; si tu CapCut no abre los proyectos, regenera con engine/make_template.py)")
     else: line(False, "template/capcut_template.json")
     if shutil.which("ffmpeg"):
         from prepare_media import pick_encoder

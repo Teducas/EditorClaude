@@ -13,8 +13,9 @@ No le hables de JSON, roles de color, rutas ni comandos.
 - Si dice que el branding está en otra carpeta, como Descargas o el Escritorio, cópialo tú a `marcas/<cliente>/`.
 
 ## 2. Analiza
+`PY` es `.venv\Scripts\python` en Windows y `.venv/bin/python` en Mac.
 ```
-.venv\Scripts\python engine\run.py marca marcas/<cliente>
+PY engine/run.py marca marcas/<cliente>
 ```
 Lee la salida (también queda en `_revision/inventario.txt`) y **mira cada `_revision/hoja_*.jpg`**. Si hay texto extraído de un manual (`_revision/*_texto.txt`), léelo: los manuales suelen decir qué color es el principal y cuál el acento.
 
@@ -27,11 +28,11 @@ Lee la salida (también queda en `_revision/inventario.txt`) y **mira cada `_rev
   - El resto se deriva solo.
   - Prioriza los códigos escritos en documentos sobre los colores medidos en fotos. Ignora el blanco, el negro y los colores de fotos de ambiente.
 - **Si el color principal es muy claro**, por ejemplo amarillo o pastel: úsalo como `accent` y pon como `primary` el color oscuro de la marca. Si no hay un oscuro, usa uno muy oscuro del mismo tono.
-- **Fuentes:** si hay archivos .ttf u .otf, se detectan solos. Si el manual nombra una fuente que no está en la carpeta, dile al diseñador que, si la tiene, copie los archivos de la fuente en la carpeta. Mientras tanto se usa Segoe UI.
+- **Fuentes:** si hay archivos .ttf u .otf, se detectan solos. Si el manual nombra una fuente que no está en la carpeta, dile al diseñador que, si la tiene, copie los archivos de la fuente en la carpeta. Mientras tanto se usa la fuente del sistema: Segoe UI en Windows y Arial en Mac.
 
 ## 4. Aplica
 ```
-.venv\Scripts\python engine\run.py marca-aplicar marcas/<cliente> --logo "<archivo>" --colores primary=#xxxxxx,accent=#xxxxxx --nombre "<Nombre del cliente>"
+PY engine/run.py marca-aplicar marcas/<cliente> --logo "<archivo>" --colores primary=#xxxxxx,accent=#xxxxxx --nombre "<Nombre del cliente>"
 ```
 - `--logo` acepta cualquier archivo de la carpeta o de `_revision/`. El fondo del logo se quita solo y se genera una versión en blanco.
 - Usa `--logo-tal-cual` solo si quitar el fondo estropea el logo.
